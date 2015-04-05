@@ -34,15 +34,15 @@ if ( ! empty($torrents_list))
         
         if ($tracker_type == 'series') {
             if ($hd == 1 && $tracker == 'lostfilm.tv')
-                $quality_icon = '<img src="img/720.png">&nbsp;<img src="img/1080.png">';
+                $quality_icon = '<div class="q720"></div><div class="q1080"></div>';
             elseif ($hd == 1 && $tracker == 'baibako.tv' || $hd == 1 && $tracker == 'newstudio.tv' || $hd == 1 && $tracker == 'novafilm.tv')
-                $quality_icon = '<img src="img/720.png">';
+                $quality_icon = '<div class="q720"></div>';
             elseif ($hd == 2 && $tracker == 'lostfilm.tv')
-                $quality_icon = '<img src="img/720.png">';
+                $quality_icon = '<div class="q720"></div>';
             elseif ($hd == 2 && $tracker == 'baibako.tv' || $hd == 2 && $tracker == 'newstudio.tv' || $hd == 2 && $tracker == 'novafilm.tv')
-                $quality_icon = '<img src="img/1080.png">';
+                $quality_icon = '<div class="q1080"></div>';
             else
-                $quality_icon = '<img src="img/sd.png">';
+                $quality_icon = '<div class="qsd"></div>';
         }
     
         if ( !($timestamp == '0000-00-00 00:00:00' || $timestamp == NULL)) {

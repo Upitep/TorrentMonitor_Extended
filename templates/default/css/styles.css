@@ -531,3 +531,21 @@ div.blok:before, div.blok:after {
     height: 66px;
     background: url(../img/ajax-loader.gif) 0 0 no-repeat;
 }
+
+/* Описание блоков, отвечающих за отображение иконки качества*/
+    .q720,
+    .q720mp4,
+    .q1080,
+    .qsd {
+        display: block;
+        float:left;
+        padding-left: 3px;
+        margin: auto;
+        width: 40px;
+        height: 13px;
+        background: url(../img/sd.png) 0 0 no-repeat;
+        }
+        
+        .q720 { background: url(../img/720.png) 0 0 no-repeat; }
+        .q720mp4 { background: url(../img/720mp4.png) 0 0 no-repeat; }
+        .q1080 { background: url(../img/1080.png) 0 0 no-repeat; }
