@@ -521,3 +521,13 @@ div.blok:before, div.blok:after {
     position:absolute;
     z-index:-2;
 }
+
+#loader {
+    display: block;
+    left: 50%;
+    margin-left: -33px;
+    position: absolute;
+    width: 66px;
+    height: 66px;
+    background: url(../img/ajax-loader.gif) 0 0 no-repeat;
+}

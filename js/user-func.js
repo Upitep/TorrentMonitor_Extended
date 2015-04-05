@@ -375,7 +375,7 @@ $( document ).ready(function()
     //Вызов процедуры обновления
     $("#system_update").submit(function()
     {
-        $('#system_update').empty().append('<img src="img/ajax-loader.gif" class="loader">');
+        $('#system_update').empty().append('<div id="loader"></div>');
         
         $.post("action.php",{action: 'system_update'},
             function(data) {
@@ -390,7 +390,7 @@ $( document ).ready(function()
 function show(name)
 {
     if (name == 'check' || name == 'execution' || name == 'update')
-        $('#content').empty().append('<img src="img/ajax-loader.gif" class="loader">');
+        $('#content').empty().append('<div id="loader"></div>');
 
     $.get("include/"+name+".php",
         function(data) {
