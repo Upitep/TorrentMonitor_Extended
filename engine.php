@@ -86,7 +86,7 @@ if (Sys::checkConfig())
                     if ($debug)
                         $time_start = microtime(true);
                     
-                    Trackers::checkUpdate($tracker, $torrentsList[$i], 'search');
+                    Trackers::checkUpdate($tracker, $usersList[$i], 'search');
                     
                     if ($debug)
                     {
