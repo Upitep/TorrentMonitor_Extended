@@ -6,7 +6,9 @@ class tfilemeSearch extends tfileme
 	//ищем темы пользователя	
 	public static function mainSearch($userInfo)
 	{
-		extract($userInfo);
+		$user_id = $userInfo['id'];
+		$tracker = $userInfo['tracker'];
+		$user = $userInfo['name'];
 		
 		$user = str_replace(' ', '+', iconv('utf-8', 'windows-1251', $user));
         //получаем страницу для парсинга

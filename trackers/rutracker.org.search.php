@@ -6,7 +6,9 @@ class rutrackerorgSearch extends rutrackerorg
 	//ищем темы пользователя
 	public static function mainSearch($userInfo)
 	{
-		extract($userInfo);
+		$user_id = $userInfo['id'];
+		$tracker = $userInfo['tracker'];
+		$user = $userInfo['name'];
 		
 		$cookie = Database::getCookie($tracker);
 		if (rutrackerorg::checkCookie($cookie))
