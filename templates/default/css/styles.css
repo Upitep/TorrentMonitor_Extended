@@ -85,6 +85,7 @@ select {
     outline: none;
     vertical-align: middle;
     font: inherit;
+    cursor: pointer;
     }
 
     input[type="checkbox"],
@@ -310,6 +311,7 @@ body {
                         width: 18px;
                         height: 18px;
                         background: url(../img/delete.png) 0 0 no-repeat;
+                        cursor: pointer;
                         }
                         
                         .edit { background: url(../img/edit.png) 2px 2px no-repeat; }
@@ -337,13 +339,15 @@ body {
 		background: url(../img/delete_small.png) 0 0 no-repeat;
 		height: 14px;
 		width: 14px;
+		cursor: pointer;
         }
 	
     .user-torrent {
         margin-bottom: 15px;
-		margin-left: 22px;
+	margin-left: 22px;
         padding-left: 20px;
         background: url(../img/plus.png) 0 2px no-repeat;
+        cursor: pointer;
         }
         
         .user-torrent.active { background-image: url(../img/minus.png); }
