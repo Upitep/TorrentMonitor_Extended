@@ -102,7 +102,7 @@ class Sys
             if ($param['type'] == 'GET')
                 curl_setopt($ch, CURLOPT_HTTPGET, 1);
 
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0');
 
             if (isset($param['header']))
                 curl_setopt($ch, CURLOPT_HEADER, 1);
@@ -113,15 +113,14 @@ class Sys
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
             curl_setopt($ch, CURLOPT_URL, $param['url']);
-            
-            #curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
-            $curl = curl_version();
-            if (substr($curl["ssl_version"], 0, 3) == 'NSS') {
-                curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'ecdhe_ecdsa_aes_128_sha');
-            }
 
             if (isset($param['postfields']))
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $param['postfields']);
+
+            #curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
+            $curl = curl_version();
+            if (substr($curl["ssl_version"], 0, 3) == 'NSS')
+                curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'ecdhe_ecdsa_aes_128_sha');
 
             if (isset($param['cookie']))
                 curl_setopt($ch, CURLOPT_COOKIE, $param['cookie']);

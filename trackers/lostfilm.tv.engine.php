@@ -162,24 +162,19 @@ class lostfilmtv
     {
         if (preg_match('/'.$name.'/i', $item->title))
         {
-            if ($hd == 1)
+            if ($hd == 0)
             {
-                if (preg_match_all('/1080/', $item->title, $matches))
+                if (preg_match_all('/avi|AVI/', $item->link, $matches))
                     return lostfilmtv::analysisEpisode($item);
-                else
-                {
-                    if (preg_match_all('/720|HD/', $item->title, $matches))
-                        return lostfilmtv::analysisEpisode($item);
-                }
+            }
+            elseif ($hd == 1)
+            {
+                if (preg_match_all('/mkv|MKV/', $item->link, $matches))
+                    return lostfilmtv::analysisEpisode($item);
             }
             elseif ($hd == 2)
             {
-                if (preg_match_all('/MP4/', $item->title, $matches))
-                    return lostfilmtv::analysisEpisode($item);
-            }
-            else
-            {
-                if (preg_match_all('/^(?!(.*720|.*HD|.*1080))/', $item->link, $matches))
+                if (preg_match_all('/mp4|MP4/', $item->link, $matches))
                     return lostfilmtv::analysisEpisode($item);
             }
         }
@@ -207,24 +202,36 @@ class lostfilmtv
                     $post .= $array_names[1][$i+1].'='.$array_values[1][$i].'&';
                 
                 $url = $url_array[1];
+
+                $post = substr($post, 0, -1);
+                
+                $page = Sys::getUrlContent(
+                    array(
+                        'type'           => 'POST',
+                        'header'         => 1,
+                        'returntransfer' => 1,
+                        'url'            => 'https://'.$url,
+                        'postfields'     => $post,
+                        'convert'        => array('windows-1251', 'utf-8//IGNORE'),
+                    )
+                );
+                
+                if (preg_match_all('/Set-Cookie: (\w*)=(\S*)/', $page, $array))
+                {
+                    lostfilmtv::getCookies($tracker, $array);
+                    lostfilmtv::$exucution = TRUE;
+                }
             }
-            $post = substr($post, 0, -1);
-            
-            $page = Sys::getUrlContent(
-                array(
-                    'type'           => 'POST',
-                    'header'         => 1,
-                    'returntransfer' => 1,
-                    'url'            => 'https://'.$url,
-                    'postfields'     => $post,
-                    'convert'        => array('windows-1251', 'utf-8//IGNORE'),
-                )
-            );
-            
-            if (preg_match_all('/Set-Cookie: (\w*)=(\S*)/', $page, $array))
+            else
             {
-                lostfilmtv::getCookies($tracker, $array);
-                lostfilmtv::$exucution = TRUE;
+                //устанавливаем варнинг
+                if (lostfilmtv::$warning == NULL)
+                {
+                    lostfilmtv::$warning = TRUE;
+                    Errors::setWarnings($tracker, 'credential_wrong');
+                }
+                //останавливаем выполнение цепочки
+                lostfilmtv::$exucution = FALSE;
             }
         }
         else
@@ -357,7 +364,7 @@ class lostfilmtv
                                 elseif ($hd == 2)
                                     $amp = 'MP4';
                                 else
-                                    $amp = NULL;
+                                    $amp = 'SD';
                                 //сохраняем торрент в файл
                                 $torrent = Sys::getUrlContent(
                                     array(

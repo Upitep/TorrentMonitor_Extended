@@ -22,7 +22,7 @@ class kinozaltv
         if (preg_match('/<a href=\'\/userdetails\.php\?id=\d*\'>.*<\/a>/U', $result))
             return TRUE;
         else
-            return FALSE;         
+            return FALSE;
     }
     
     //функция проверки введёного URL`а
@@ -42,7 +42,7 @@ class kinozaltv
             $pieces = explode(' ', $data);
             if ($pieces[0] == 'вчера')
                 $timestamp = strtotime('-1 day');
-            else         
+            else
                 $timestamp = strtotime('now');
             $date = date('Y-m-d', $timestamp);
             if (strstr($data, 'сейчас'))
@@ -75,7 +75,7 @@ class kinozaltv
             $pieces = explode(' ', $data);
             if ($pieces[0] == 'вчера')
                 $timestamp = strtotime('-1 day');
-            else         
+            else
                 $timestamp = strtotime('now');
             $day = date('d', $timestamp);
             $month = Sys::dateNumToString(date('m', $timestamp));
@@ -93,9 +93,9 @@ class kinozaltv
             $dateTime = $day.' '.$month.' '.$year.' в '.$time;
             return $dateTime;
         }
-        else
+           else
             return $data;
-    }   
+    }
     
     //функция получения кук
     protected static function getCookie($tracker)
@@ -118,7 +118,7 @@ class kinozaltv
                     'postfields'     => 'username='.$login.'&password='.$password.'&returnto=',
                     'convert'        => array('windows-1251', 'utf-8//IGNORE'),
                 )
-            );          
+            );
             
             if ( ! empty($page))
             {
@@ -130,10 +130,18 @@ class kinozaltv
                     //останавливаем процесс выполнения, т.к. не может работать без кук
                     kinozaltv::$exucution = FALSE;
                 }
+                //проверяем нет ли блокировки
+                if (preg_match('/Превышен лимит попыток входа в профиль <br>Попробуйте через 2 часа/', $page, $array))
+                {
+                    //устанавливаем варнинг
+                    Errors::setWarnings($tracker, 'limit');
+                    //останавливаем процесс выполнения, т.к. не может работать без кук
+                    kinozaltv::$exucution = FALSE;
+                }
                 //если подходят - получаем куки
                 elseif (preg_match_all('/Set-Cookie: (.+);/iU', $page, $array))
                 {
-                    kinozaltv::$sess_cookie = $array[1][0].'; '.$array[1][1].';';
+                    kinozaltv::$sess_cookie = $array[1][1].'; '.$array[1][2].';';
                     Database::setCookie($tracker, kinozaltv::$sess_cookie);
                     //запускам процесс выполнения, т.к. не может работать без кук
                     kinozaltv::$exucution = TRUE;
@@ -216,7 +224,6 @@ class kinozaltv
                     }
                     else
                     {
-                        
                         if ($auto_update)
                         {
                             $name = Sys::getHeader('http://kinozal.tv/details.php?id='.$torrent_id);
@@ -226,7 +233,7 @@ class kinozaltv
                         
                         $message = $name.' обновлён.';
                         $status = Sys::saveTorrent($tracker, $torrent_id, $torrent, $id, $hash, $message, $date_str);
-                                
+                        
                         //обновляем время регистрации торрента в базе
                         Database::setNewDate($id, $date);
                     }
@@ -268,7 +275,7 @@ class kinozaltv
             kinozaltv::$sess_cookie = $cookie;
             //запускам процесс выполнения
             kinozaltv::$exucution = TRUE;
-        }           
+        }
         else
             kinozaltv::getCookie($tracker);
         
@@ -285,7 +292,7 @@ class kinozaltv
                     'sendHeader'     => array('Host' => 'kinozal.tv', 'Content-length' => strlen(kinozaltv::$sess_cookie)),
                     'convert'        => array('windows-1251', 'utf-8//IGNORE'),
                 )
-            );          
+            );
             
             if ( ! empty($page))
             {
@@ -305,7 +312,7 @@ class kinozaltv
                     //останавливаем процесс выполнения, т.к. не может работать без даты
                     kinozaltv::$exucution = FALSE;
                 }
-            }           
+            }
             else
             {
                 //устанавливаем варнинг
