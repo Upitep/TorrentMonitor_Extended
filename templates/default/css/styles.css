@@ -301,6 +301,7 @@ body {
                 td { border-right: 1px #E2E6EF solid; }
                     
                     .close,
+                    .download,
                     .delete,
                     .edit,
                     .add {
@@ -317,7 +318,11 @@ body {
                         .edit { background: url(../img/edit.png) 2px 2px no-repeat; }
                         .add { background: url(../img/add.png) 2px 2px no-repeat; }
                         .close { float:right; }
-    
+                        .download {
+                            width: 19px;
+                            height: 24px;
+                            background: url(../img/icon1.png) 0 0 no-repeat;
+                            }  
     .update {
         float: right;
         text-align: center;

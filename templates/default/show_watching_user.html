@@ -15,9 +15,9 @@
       <tbody>
         {loop="thremes"}
         <tr>
-          <td ><img src="img/icon1.png" onclick="threme_add({$value.id}, {$users.id})"></td>
+          <td ><a class="download" onclick="threme_add({$value.id}, {$user.id})"></a></td>
           <td class="text-align-left">{$value.section}</td>
-          <td class="text-align-left"><a href='http://{$users.tracker}/forum/viewtopic.php?t={$value.id}' target="_blank">{$value.threme}</a></td>
+          <td class="text-align-left"><a href='{$value.url}' target="_blank">{$value.threme}</a></td>
           <td><a class="delete" onclick="delete_from_buffer({$value.id})"></a></td>
           <td><a class="add" onclick="transfer_from_buffer({$value.id})"></a></td>
         </tr>

@@ -7,6 +7,7 @@ if ( ! Sys::checkAuth())
     die(header('Location: ../'));
 
 include_once $dir."class/Database.class.php";
+include_once $dir."class/Trackers.class.php";
 include_once $dir."class/rain.tpl.class.php";
 
 $contents = array();
@@ -18,14 +19,18 @@ raintpl::configure("tpl_dir" , Sys::getTemplateDir() );
 $users = Database::getUserToWatch();
 if ( ! empty($users))
 {
-    for ($i=0; $i<count($users); $i++)
-    {
+    foreach ($users as $user){
+        $thremes = Database::getThremesFromBuffer($user['id']);
+        
+        foreach ($thremes as $key=>$threme) {
+            $thremes[$key]['url'] = Trackers::generateURL($user['tracker'], $threme['threme_id']);
+        }
+        
         $tpl = new RainTPL;
-        $tpl->assign( "user", $users[$i] );
-        $tpl->assign( "thremes", Database::getThremesFromBuffer($users[$i]['id']) );
+        $tpl->assign( "user", $user );
+        $tpl->assign( "thremes", $thremes );
         
         $contents[] = $tpl->draw( 'show_watching_user', true );
-        $thremes = Database::getThremesFromBuffer($users[$i]['id']);
     }
 }
 else
