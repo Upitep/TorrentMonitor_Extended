@@ -22,9 +22,10 @@ if ( ! empty($users))
     foreach ($users as $user){
         $thremes = Database::getThremesFromBuffer($user['id']);
         
-        foreach ($thremes as $key=>$threme) {
-            $thremes[$key]['url'] = Trackers::generateURL($user['tracker'], $threme['threme_id']);
-        }
+        if (count($thremes))
+            foreach ($thremes as $key=>$threme) {
+                $thremes[$key]['url'] = Trackers::generateURL($user['tracker'], $threme['threme_id']);
+            }
         
         $tpl = new RainTPL;
         $tpl->assign( "user", $user );
