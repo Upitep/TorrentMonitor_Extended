@@ -85,8 +85,9 @@ select {
     outline: none;
     vertical-align: middle;
     font: inherit;
-    cursor: pointer;
     }
+
+    button { cursor: pointer; }
 
     input[type="checkbox"],
     input[type="radio"] { vertical-align: bottom; }

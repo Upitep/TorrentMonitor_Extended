@@ -36,8 +36,10 @@ $( document ).ready(function()
             function(data) {
                 if (data.error)
                     addNotify({ message: data.msg, type: 'error'});
-                else
-                    document.location.reload();
+                else {
+                    showIndexContent();
+                    addNotify({ message: data.msg });
+                }
                 console.log(data.error)
             }, "json"
         );
@@ -584,4 +586,31 @@ function addNotify(data)
     type = data['type'];
     
     ohSnap( message, type );
+}
+
+//Обновляем основную страницу без перезагрузки содержимого
+function showIndexContent()
+{
+    $.post("action.php", {action: 'getIndexPage'},
+        function(data) {
+            $('#index_content').empty().append(data.content);
+            
+            if (data.type == 'auth') {
+                FocusOnInput('password');
+            }
+            else if (data.type == 'main') {
+                show('show_table');
+            }
+        }, "json"
+    );
+}
+
+//Переводим фокус на переданное поле ввода 
+function FocusOnInput(fieldName) {
+    document.getElementById(fieldName).focus();
+}
+
+//При загрузке страницы index выполняем обновление содержимого
+window.onload = function(){
+    showIndexContent();
 }

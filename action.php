@@ -7,6 +7,7 @@ include_once $dir.'class/Errors.class.php';
 include_once $dir.'class/Notification.class.php';
 include_once $dir.'class/Trackers.class.php';
 include_once $dir.'class/Update.class.php';
+include_once $dir."class/rain.tpl.class.php";
 
 if (isset($_POST['action']))
 {
@@ -21,6 +22,7 @@ if (isset($_POST['action']))
             session_start();
             $_SESSION['TM'] = $password;
             $return['error'] = FALSE;
+            $return['msg'] = 'Вход выполнен успешно.';
         }
         else
         {
@@ -389,6 +391,41 @@ if (isset($_POST['action']))
         return TRUE;
     }
     
+    //Возвращаем содержимое страницы index в зависимости от состояния авторизации
+    if ($_POST['action'] == 'getIndexPage')
+    {
+        $result = array();
+
+        // заполнение шаблона
+        raintpl::configure("root_dir", $dir );
+        raintpl::configure("tpl_dir" , Sys::getTemplateDir() );
+         
+        if (Sys::checkAuth())
+        {
+            $errors = Database::getWarningsCount();
+            
+            $count = 0;
+            if ( ! empty($errors))
+                for ($i=0; $i<count($errors); $i++)
+                    $count += $errors[$i]['count'];
+            
+            $tpl = new RainTPL;
+            $tpl->assign( "update"     , Sys::checkUpdate() );
+            $tpl->assign( "version"    , Sys::version() );
+            $tpl->assign( "error_count", $count );
+        
+            $result['content'] = $tpl->draw( 'index_main', true );
+            $result['type'] = 'main';
+        }
+        else
+        {
+            $tpl = new RainTPL;
+            $result['content'] = $tpl->draw( 'index_auth', true );
+            $result['type'] = 'auth';
+        }
+        
+        echo json_encode($result);
+    }
 }
 
 if (isset($_GET['action']))
