@@ -89,7 +89,8 @@ class kinozal
 	        $day = date('d', $timestamp);
 			$month = Sys::dateNumToString(date('m', $timestamp));
 			$year = date('Y', $timestamp);
-	        $dateTime = $day.' '.$month.' '.$year.' в '.$pieces[2];
+			$time = date('G:i').':00';
+	        $dateTime = $day.' '.$month.' '.$year.' в '.$time;
 	        return $dateTime;
         }
 	   	else
@@ -129,10 +130,18 @@ class kinozal
 					//останавливаем процесс выполнения, т.к. не может работать без кук
 					kinozal::$exucution = FALSE;
 				}
+				//проверяем нет ли блокировки
+				if (preg_match('/Превышен лимит попыток входа в профиль <br>Попробуйте через 2 часа/', $page, $array))
+				{
+					//устанавливаем варнинг
+					Errors::setWarnings($tracker, 'limit');
+					//останавливаем процесс выполнения, т.к. не может работать без кук
+					kinozal::$exucution = FALSE;
+				}
 				//если подходят - получаем куки
 				elseif (preg_match_all('/Set-Cookie: (.+);/iU', $page, $array))
 				{
-					kinozal::$sess_cookie = $array[1][0].'; '.$array[1][1].';';
+					kinozal::$sess_cookie = $array[1][1].'; '.$array[1][2].';';
 					Database::setCookie($tracker, kinozal::$sess_cookie);
 					//запускам процесс выполнения, т.к. не может работать без кук
 					kinozal::$exucution = TRUE;
@@ -189,7 +198,7 @@ class kinozal
 				$date = kinozal::dateStringToNum($array[1]);
 				$date_str = kinozal::dateNumToString($array[1]);
 				//если даты не совпадают, перекачиваем торрент
-				if ($date != $timestamp)
+				if ($date > $timestamp)
 				{
 					//сохраняем торрент в файл
                     $torrent = Sys::getUrlContent(
