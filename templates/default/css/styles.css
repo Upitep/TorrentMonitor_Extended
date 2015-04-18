@@ -360,6 +360,15 @@ body {
     
     .user-table { display: none; }
     
+    .add-notifier-title {
+        margin-bottom: 15px;
+        padding-left: 25px;
+        background: url(../img/add.png) 0px 2px no-repeat;
+        color: #5d939f;
+        font-size: 14px;
+        cursor: pointer;
+        }
+    
     .monitoring-title,
     .account-title,
     .settings-title {
@@ -526,6 +535,16 @@ div.blok {
 div.blok:before, div.blok:after {
     position:absolute;
     z-index:-2;
+}
+
+
+.notifierSettings {
+ vertical-align: middle; 
+ padding: 0px 5px;
+ border: 0px;
+ width: auto;
+ background: none;
+ color: #595959;
 }
 
 #loader {

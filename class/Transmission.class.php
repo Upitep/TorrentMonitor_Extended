@@ -1,6 +1,6 @@
 <?php
-$dir = dirname(__FILE__).'/';
-include_once $dir.'TransmissionRPC.class.php';
+$dir = str_replace('class', '', dirname(__FILE__));
+include_once $dir.'class/TransmissionRPC.class.php';
 
 class Transmission
 {
@@ -121,6 +121,28 @@ class Transmission
                 die('[ERROR]'.$e->getMessage().PHP_EOL);
         }
         return $return;
+    }
+
+    public static function checkSettings()
+    {
+        $settings = Database::getAllSetting();
+        foreach ($settings as $row)
+            extract($row);
+
+    	try
+	    {
+    	    $rpc = new TransmissionRPC('http://'.$torrentAddress.'/transmission/rpc', $torrentLogin, $torrentPassword);
+    	    $result = $rpc->sstats()->result;
+        }
+        catch (Exception $e)
+        {
+            return array('text' => '<p>'.$e->getMessage().'</p>', 'error' => true);
+        }
+
+        if ( $result != "success" )
+            return array('text' => '<p>'.$result.'</p>', 'error' => true);
+        else
+            return array('text' => 'OK', 'error' => false);
     }
 }
 ?>

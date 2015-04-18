@@ -20,5 +20,28 @@ foreach ($settings as $row)
     foreach ($row as $key=>$val)
         $tpl->assign( $key, $val );
 
+$notifiersList = array();
+
+foreach (Database::getActivePluginsByType(Notifier::$type) as $plugin)
+{
+    $notifier = Notifier::Create($plugin['name'], $plugin['group']);
+    if ($notifier == null)
+        continue;
+
+    $needSendUpdate = "";
+    $needSendWarning = "";
+    if ($notifier->SendUpdate() == TRUE)
+        $needSendUpdate = 'checked';
+    if ($notifier->SendWarning() == TRUE)
+        $needSendWarning = 'checked';
+
+    $notifiersList[] = array('notifier' => $notifier,
+                             'needSendUpdate' => $needSendUpdate,
+                             'needSendWarning' => $needSendWarning);
+}
+
+$tpl->assign( 'notifiersList', $notifiersList );
+$tpl->assign( 'notifiers', Sys::getNotifiers() );
+
 $tpl->draw( 'settings' );
 ?>

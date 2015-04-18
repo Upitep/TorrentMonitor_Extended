@@ -294,13 +294,6 @@ $( document ).ready(function()
         var $form = $(this),
             s = $form.find('input[type=submit]'),
             serverAddress = $form.find('input[name="serverAddress"]').val();
-            send = $form.find('input[name="send"]').prop('checked');
-            sendUpdate = $form.find('input[name="sendUpdate"]').prop('checked');
-            sendUpdateEmail = $form.find('input[name="sendUpdateEmail"]').val();
-            sendUpdatePushover = $form.find('input[name="sendUpdatePushover"]').val();            
-            sendWarning = $form.find('input[name="sendWarning"]').prop('checked');
-            sendWarningEmail = $form.find('input[name="sendWarningEmail"]').val();
-            sendWarningPushover = $form.find('input[name="sendWarningPushover"]').val();            
             auth = $form.find('input[name="auth"]').prop('checked');
             proxy = $form.find('input[name="proxy"]').prop('checked');
             proxyAddress = $form.find('input[name="proxyAddress"]').val();
@@ -337,8 +330,11 @@ $( document ).ready(function()
         }
 
         ohSnap('Обрабатывается запрос...', 'yellow');
-        $.post("action.php",{action: 'update_settings', serverAddress: serverAddress, send: send, sendUpdate: sendUpdate,
-            sendUpdateEmail: sendUpdateEmail, sendUpdatePushover: sendUpdatePushover, sendWarning: sendWarning, sendWarningEmail: sendWarningEmail, sendWarningPushover: sendWarningPushover, auth: auth, proxy: proxy, proxyAddress: proxyAddress, torrent: torrent, torrentClient: torrentClient, torrentAddress: torrentAddress, torrentLogin: torrentLogin, torrentPassword: torrentPassword, pathToDownload: pathToDownload, deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, rss: rss, debug: debug},
+        $.post("action.php",{action: 'update_settings', serverAddress: serverAddress, 
+            auth: auth, proxy: proxy, proxyAddress: proxyAddress, torrent: torrent, torrentClient: torrentClient, 
+            torrentAddress: torrentAddress, torrentLogin: torrentLogin, torrentPassword: torrentPassword, 
+            pathToDownload: pathToDownload, deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, 
+            rss: rss, debug: debug},
             function(data) {
                 ohSnapX();
                 ohSnap(data, 'green');
@@ -398,6 +394,36 @@ $( document ).ready(function()
                 $('#system_update').empty().html(data);
             }
         );
+    });
+
+    //Сохраняем настройки уведомлений
+    $("#notifier_settings").submit(function()
+    {
+        //debugger;        
+        var table = document.getElementById('notifiers-table');
+
+        var notifiersSettings = {}; 
+        for (var i = 1, row; row = table.rows[i]; i++) {
+            var notifier = {};
+            notifier["group"] = parseInt(row.getAttribute('group'));
+
+            var notifSelect = row.children[0].children[0];
+            notifier["notifier"] = notifSelect.options[notifSelect.selectedIndex].value;
+
+            notifier["address"] = row.children[1].children[0].value;
+            notifier["sendUpdate"] = row.children[2].children[0].checked;
+            notifier["sendWarning"] = row.children[3].children[0].checked;
+
+            notifiersSettings[i - 1] = notifier;
+        } 
+        addNotify({ message: 'Обрабатывается запрос...' });
+        var settings = JSON.stringify(notifiersSettings);
+        $.post("action.php",{action: 'updateNotifierSettings', settings: settings},
+            function(data) {
+                addNotify({ message: data });
+            }
+        );           
+        return false;
     });
 
 });
@@ -597,6 +623,47 @@ function newsRead(id)
             $('.'+id).removeClass();
         }
     );
+}
+
+$(".add-notifier-title").click(function() {
+    //debugger;
+    var maxGroup = 0;
+    var table = document.getElementById('notifiers-table');
+    for (var i = 1, row; row = table.rows[i]; i++) {
+        var rowGroup = parseInt(row.getAttribute('group'));
+        if (rowGroup > maxGroup)
+            maxGroup = rowGroup;
+    }
+    maxGroup += 1;
+
+    var availableNotifiersHtml = "";
+    $.post("action.php", {action: 'getNotifierList'},
+		function(data) {
+            for (var notifier in data) {
+                    availableNotifiersHtml += "<option value=\"" + data[notifier].Name + "\" >" + data[notifier].VerboseName + "</option>";
+            }
+            var table_row = '<tr class="notifierSettings" group="' + maxGroup + '">' +
+                    '<td class="notifierSettings"><select id="sendService" name="sendService" style="width: 150px;">' + availableNotifiersHtml + '</select> </td>' +
+                    '<td class="notifierSettings"><input type="text" name="sendAddress" value="" style="width: 300px;"> </td>' +
+                    '<td class="notifierSettings"><input type="checkbox" name="sendUpdate" > </td>' +
+                    '<td class="notifierSettings"><input type="checkbox" name="sendWarning" > </td>' +
+                    '<td class="notifierSettings"><a class="delete" onclick="removeNotifierSetting(this)"></a> </td>' +
+                    '</tr>';
+            $(table_row).hide().insertAfter($('#notifiers-table tr:last')).removeClass("hide").addClass("show-row").hide().show('fast');
+		}, "json"
+	);
+});
+
+function removeNotifierSetting(btn) 
+{
+    var tr = btn.parentNode.parentNode;
+    var group = tr.getAttribute('group');
+    var notifSelect = tr.children[0].children[0];
+    var notifier = notifSelect.options[notifSelect.selectedIndex].value;
+
+    $.post("action.php", {action: 'removeNotifierSettings', notifierClass: notifier, group: group});
+
+    tr.parentNode.removeChild(tr);
 }
 
 

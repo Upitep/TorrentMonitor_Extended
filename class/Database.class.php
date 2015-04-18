@@ -147,14 +147,29 @@ class Database
     
     public static function updateSettings($setting, $val)
     {
-        $stmt = self::newStatement("UPDATE `settings` SET `val` = :val WHERE `key` = :setting");
+        $settingExist = false;
+        $stmt = self::newStatement("SELECT `id` FROM `settings` WHERE `key` = :setting");
+        $stmt->bindParam(':setting', $setting);
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $settingExist = $row['id'] > 0;
+                break;
+            }
+        }
+        if ( $settingExist )
+            $stmt = self::newStatement("UPDATE `settings` SET `val` = :val WHERE `key` = :setting");
+        else
+            $stmt = self::newStatement("INSERT INTO `settings` (`key`, `val`) VALUES (:setting, :val)");
         $stmt->bindParam(':setting', $setting);
         $stmt->bindParam(':val', $val);
         if ($stmt->execute())
-            return TRUE;
+            $result = TRUE;
         else
-            return FALSE;
+            $result = FALSE;
         $stmt = NULL;
+        return $result;
     }
     
     public static function getCredentials($tracker)
@@ -1060,6 +1075,131 @@ class Database
         else
             return FALSE;
         $stmt = NULL;
+    }
+
+    public static function getPluginSetting($plugin, $setting)
+    {
+        $result = "";
+        $stmt = self::newStatement("SELECT `value` FROM `pluginsettings` WHERE `type` = :type AND `plugin` = :plugin AND `group` = :group AND `key` = :setting");
+
+        $type = $plugin->Type();
+        $name = $plugin->Name();
+        $group = $plugin->Group();
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':plugin', $name);
+        $stmt->bindParam(':group', $group);
+        $stmt->bindParam(':setting', $setting);
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $result = $row['value'];
+                break;
+            }
+        }
+
+        $stmt = NULL;
+        return $result;
+    }
+
+    public static function setPluginSetting($plugin, $setting, $value)
+    {
+        $result = FALSE;
+        $settingId = -1;
+        $type = $plugin->Type();
+        $name = $plugin->Name();
+        $group = $plugin->Group();
+        if (empty($group))
+        {
+            $stmt = self::newStatement("SELECT `id` FROM `pluginsettings` WHERE `type` = :type AND `plugin` = :plugin AND `group` = :group AND `key` = :setting");
+            $stmt->bindParam(':plugin', $name);
+        }
+        else
+            $stmt = self::newStatement("SELECT `id` FROM `pluginsettings` WHERE `type` = :type AND `group` = :group AND `key` = :setting");
+
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':group', $group);
+        $stmt->bindParam(':setting', $setting);
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $settingId = $row['id'];
+                break;
+            }
+        }
+        $stmt = NULL;
+
+        if ( $settingId > 0 )
+        {
+            if (empty($value)) // ежели значение пустое, то смело удаляем параметр из базы, ибо нечего хранить пустышки.
+                $stmt = self::newStatement("DELETE FROM `pluginsettings` WHERE `id` = :settingId");
+            else
+            {
+                $stmt = self::newStatement("UPDATE `pluginsettings` SET `plugin` = :plugin, `value` = :value WHERE `id` = :settingId");
+                $stmt->bindParam(':plugin', $name);
+                $stmt->bindParam(':value', $value);
+            }
+            $stmt->bindParam(':settingId', $settingId);
+        }
+        else
+        {
+            if (empty($value))
+                return TRUE; // ибо нечего в базу пустые значения пихать...
+            else
+            {
+                $stmt = self::newStatement("INSERT INTO `pluginsettings` (`type`, `plugin`, `group`, `key`, `value`) VALUES (:type, :plugin, :group, :setting, :value)");
+                $stmt->bindParam(':type', $type);
+                $stmt->bindParam(':plugin', $name);
+                $stmt->bindParam(':group', $group);
+                $stmt->bindParam(':setting', $setting);
+                $stmt->bindParam(':value', $value);
+            }
+        }
+        if ($stmt->execute())
+            $result = TRUE;
+        else
+            $result = FALSE;
+
+        $stmt = NULL;
+
+        return $result;
+    }
+
+    public static function removePluginSettings($plugin)
+    {
+        $result = FALSE;
+        $stmt = self::newStatement("DELETE FROM `pluginsettings` WHERE `type` = :type AND `plugin` = :plugin AND `group` = :group");
+
+        $type = $plugin->Type();
+        $name = $plugin->Name();
+        $group = $plugin->Group();
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':plugin', $name);
+        $stmt->bindParam(':group', $group);
+
+        if ($stmt->execute())
+            $result = TRUE;
+
+        $stmt = NULL;
+        return $result;
+    }
+
+    public static function getActivePluginsByType($type)
+    {
+        $result = array();
+        $stmt = self::newStatement("SELECT `plugin`, `group` FROM `pluginsettings` WHERE `type` = :type GROUP BY `plugin`, `group` ORDER BY `group`");
+        $stmt->bindParam(':type', $type);
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $result[] = array("name"=>$row['plugin'], "group"=>$row['group']);
+            }
+        }
+        $stmt = NULL;
+        return $result;
+
     }
 }
 ?>

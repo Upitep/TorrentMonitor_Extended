@@ -6,38 +6,7 @@
         <input type="text" name="serverAddress" value="{$serverAddress}">
         <span class="subinput-text">Например: http://torrent.test.ru/</span>
     </p>
-    <p>
-        <label class="label-name"></label>
-        <label><input type="checkbox" name="send" {if="$send"}checked{/if} onclick="expand('sendNotification')"> Отправлять уведомления</label>
-    </p>
-    <div id="sendNotification" {if="! $send"}class="result"{/if}>
-        <p>
-            <label class="label-name"></label>
-            <label><input type="checkbox" name="sendUpdate" {if="$sendUpdate"}checked{/if} onclick="expand('sendUpdate')"> Отправлять уведомления об обновлениях</label>
-        </p>
-        <div id="sendUpdate" {if="! $sendUpdate"}class="result"{/if}>
-            <label class="label-name">E-mail</label>
-            <input type="text" name="sendUpdateEmail" value="{$sendUpdateEmail}">
-            <span class="subinput-text">Например: vasya@test.ru</span>
-            <br />
-            <label class="label-name">Pushover (<a href="https://pushover.net" target="_blank">?</a>)</label>
-            <input type="text" name="sendUpdatePushover" value="{$sendUpdatePushover}">
-            <span class="subinput-text">Например: uyrxppPbPgetdh7neWr4NZ8rYuyTXD</span>
-        </div>
-        <p>
-            <label class="label-name"></label>
-            <label><input type="checkbox" name="sendWarning" {if="$sendWarning"}checked{/if} onclick="expand('sendWarning')"> Отправлять уведомления об ошибках</label>
-        </p>
-        <div id="sendWarning" {if="! $sendWarning"}class="result"{/if}>
-            <label class="label-name">E-mail</label>
-            <input type="text" name="sendWarningEmail" value="{$sendWarningEmail}">
-            <span class="subinput-text">Например: vasya@test.ru</span>
-            <br />
-            <label class="label-name">Pushover (<a href="https://pushover.net" target="_blank">?</a>)</label>
-            <input type="text" name="sendWarningPushover" value="{$sendWarningPushover}">
-            <span class="subinput-text">Например: uyrxppPbPgetdh7neWr4NZ8rYuyTXD</span>
-        </div>
-    </div>
+    <br/>
     <p>
         <label class="label-name"></label>
         <label><input type="checkbox" name="auth" {if="$auth"}checked{/if}> Включить авторизацию</label>
@@ -106,6 +75,37 @@
         <label class="label-name"></label>
         <label><input type="checkbox" name="debug" {if="$debug"}checked{/if}> Режим отладки</label>
     </p>
+    <button class="form-button">Сохранить</button>
+</form>
+<br/>
+<br/>
+<h2 class="settings-title">Настройки уведомлений</h2>
+<form id="notifier_settings">
+    <label id="notifiers-table-hint"/>
+    <table class="notifierSettings" id="notifiers-table">
+        <tr class="notifierSettings">
+            <th>Сервис</th>
+            <th>Адрес</th>
+            <th><img src="img/icon9-2.png" title="Отправлять уведомления о добавлении/обновлении раздач"/></th>
+            <th><img src="img/icon6.png" title="Отправлять уведомления об ошибках"/></th>
+            <th/>
+        </tr>
+        {loop="notifiersList"}
+        <tr class="notifierSettings" group="{$value.notifier->Group()}">
+            <td class="notifierSettings"><select id="sendService" name="sendService" style="width: 150px;">
+            {loop="notifiers"}
+                <option value="{$value2.Name}" {if="$value2.Name == $value1.notifier->Name()"}selected{/if}>{$value2.VerboseName}</option>
+            {/loop}
+            </select></td>
+            <td><input type="text" name="sendAddress" value="{$value.notifier->SendAddress()}" style="width: 300px;"> </td>
+            <td><input type="checkbox" name="sendUpdate" {$value.needSendUpdate} > </td>
+            <td><input type="checkbox" name="sendWarning" {$value.needSendWarning} > </td>
+            <td><a class="delete" onclick="removeNotifierSetting(this)"></a> </td>
+        </tr>
+        {/loop}
+    </table>
+    <h2 class="add-notifier-title" >Добавить службу уведомлений</h2>
+    <label id="notifier-list-end"/>
     <button class="form-button">Сохранить</button>
 </form>
 <br/>

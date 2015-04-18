@@ -3,8 +3,8 @@ $dir = dirname(__FILE__).'/';
 include_once $dir.'config.php';
 include_once $dir.'class/System.class.php';
 include_once $dir.'class/Database.class.php';
+include_once $dir.'class/Notifier.class.php';
 include_once $dir.'class/Errors.class.php';
-include_once $dir.'class/Notification.class.php';
 include_once $dir.'class/Trackers.class.php';
 include_once $dir.'class/Update.class.php';
 include_once $dir."class/rain.tpl.class.php";
@@ -280,69 +280,36 @@ if (isset($_POST['action']))
     if ($_POST['action'] == 'update_settings')
     {
         Database::updateSettings('serverAddress', Sys::checkPath($_POST['serverAddress']));
-        if ($_POST['send'] == 'true')
-            $send = 1;
-        else
-            $send = 0;
-        Database::updateSettings('send', $send);
-        if ($_POST['sendUpdate'] == 'true')
-            $sendUpdate = 1;
-        else
-            $sendUpdate = 0;
-        Database::updateSettings('sendUpdate', $sendUpdate);
-        Database::updateSettings('sendUpdateEmail', $_POST['sendUpdateEmail']);
-        Database::updateSettings('sendUpdatePushover', $_POST['sendUpdatePushover']);
-        if ($_POST['sendWarning'] == 'true')
-            $sendWarning = 1;
-        else
-            $sendWarning = 0;
-        Database::updateSettings('sendWarning', $sendWarning);
-        Database::updateSettings('sendWarningEmail', $_POST['sendWarningEmail']);
-        Database::updateSettings('sendWarningPushover', $_POST['sendWarningPushover']);
-        if ($_POST['auth'] == 'true')
-            $auth = 1;
-        else
-            $auth = 0;
-        Database::updateSettings('auth', $auth);
-        if ($_POST['proxy'] == 'true')
-            $proxy = 1;
-        else
-            $proxy = 0;
-        Database::updateSettings('proxy', $proxy);
+        Database::updateSettings('auth', Sys::strBoolToInt($_POST['auth']));
+        Database::updateSettings('proxy', Sys::strBoolToInt($_POST['proxy']));
         Database::updateSettings('proxyAddress', $_POST['proxyAddress']);
-        if ($_POST['torrent'] == 'true')
-            $torrent = 1;
-        else
-            $torrent = 0;
-        Database::updateSettings('useTorrent', $torrent);
+        Database::updateSettings('useTorrent', Sys::strBoolToInt($_POST['torrent']));
         Database::updateSettings('torrentClient', $_POST['torrentClient']);
         Database::updateSettings('torrentAddress', $_POST['torrentAddress']);
         Database::updateSettings('torrentLogin', $_POST['torrentLogin']);
         Database::updateSettings('torrentPassword', $_POST['torrentPassword']);
         Database::updateSettings('pathToDownload', Sys::checkPath($_POST['pathToDownload']));
-        if ($_POST['deleteDistribution'] == 'true')
-            $deleteDistribution = 1;
-        else
-            $deleteDistribution = 0;
-        Database::updateSettings('deleteDistribution', $deleteDistribution);
-        if ($_POST['deleteOldFiles'] == 'true')
-            $deleteOldFiles = 1;
-        else
-            $deleteOldFiles = 0;
-        Database::updateSettings('deleteOldFiles', $deleteOldFiles);
-        if ($_POST['rss'] == 'true')
-            $rss = 1;
-        else
-            $rss = 0;
-        Database::updateSettings('rss', $rss);
-        if ($_POST['debug'] == 'true')
-            $debug = 1;
-        else
-            $debug = 0;
-        Database::updateSettings('debug', $debug);
+        Database::updateSettings('deleteDistribution', Sys::strBoolToInt($_POST['deleteDistribution']));
+        Database::updateSettings('deleteOldFiles', Sys::strBoolToInt($_POST['deleteOldFiles']));
+        Database::updateSettings('rss', Sys::strBoolToInt($_POST['rss']));
+        Database::updateSettings('debug', Sys::strBoolToInt($_POST['debug']));
         
         echo 'Настройки монитора обновлены.';
         
+        return TRUE;
+    }
+    
+    if ($_POST['action'] == 'updateNotifierSettings')
+    {
+        $notifiersSettings = json_decode($_POST['settings'], true);
+        foreach ($notifiersSettings as $key => $settings)
+        {
+            $notifier = Notifier::Create($settings['notifier'], $settings['group']);
+            if ($notifier != NULL)
+                $notifier->SetParams($settings['address'], $settings['sendUpdate'], $settings['sendWarning']);
+            $notifier = NULL;
+        }
+        echo "Настройки уведомлений обновлены.";
         return TRUE;
     }
     
@@ -393,6 +360,20 @@ if (isset($_POST['action']))
         return TRUE;
     }
     
+    // Получаем список доступных нотификаторов
+    if ($_POST['action'] == 'getNotifierList')
+    {
+        echo json_encode(Sys::getNotifiers());
+    }
+
+    if ($_POST['action'] == 'removeNotifierSettings')
+    {
+        $notifier = Notifier::Create($_POST['notifierClass'], $_POST['group']);
+        if ($notifier != NULL)
+            Database::removePluginSettings($notifier);
+        $notifier = NULL;
+    }
+
     //Возвращаем содержимое страницы index в зависимости от состояния авторизации
     if ($_POST['action'] == 'getIndexPage')
     {

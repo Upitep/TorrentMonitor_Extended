@@ -6,27 +6,34 @@ include_once $dir."class/System.class.php";
 if ( ! Sys::checkAuth())
     die(header('Location: ../'));
 
+include_once $dir."class/Notifier.class.php";
 include_once $dir."class/Database.class.php";
+include_once $dir."class/Deluge.class.php";
+include_once $dir."class/Transmission.class.php";
 include_once $dir."class/rain.tpl.class.php";
+
+$settings = Database::getAllSetting();
+foreach ($settings as $row)
+    extract($row);
 
 $contents = array();
 
 if (Sys::checkInternet())
 {
-    $contents[] = array('text' => 'Подключение к интернету установлено.',);
+    $contents[] = array('text' => 'Подключение к интернету установлено.', 'error' => false);
     
     if (Sys::checkConfigExist())
     {
-        $contents[] = array('text' => 'Конфигурационный файл существует и заполнен.',);
+        $contents[] = array('text' => 'Конфигурационный файл существует и заполнен.', 'error' => false);
         
         if (Sys::checkCurl())
         {
-            $contents[] = array('text' => 'Расширение cURL установлено.',);
+            $contents[] = array('text' => 'Расширение cURL установлено.', 'error' => false);
             
             $torrentPath = $dir.'torrents/';
             if (Sys::checkWriteToPath($torrentPath))
             {
-                $contents[] = array('text' => 'Запись в директорию для torrent-файлов "'.$torrentPath.'" разрешена.',);
+                $contents[] = array('text' => 'Запись в директорию для torrent-файлов "'.$torrentPath.'" разрешена.', 'error' => false);
             }
             else
             {
@@ -36,7 +43,7 @@ if (Sys::checkInternet())
 
             if (Sys::checkWriteToPath($dir))
             {
-                $contents[] = array('text' => 'Запись в системную директорию "'.$dir.'" разрешена.',);
+                $contents[] = array('text' => 'Запись в системную директорию "'.$dir.'" разрешена.', 'error' => false);
             }
             else
             {
@@ -44,12 +51,33 @@ if (Sys::checkInternet())
                                     'error' => true);
             }
             
+            $contents[] = array('text' => 'Отправка тестовых уведомлений об обновлениях', 'error' => false);
+            $result = Notifier::send('notification', date('Y-m-d H:i:s'), 'TorrentMonitor notifier', 'Тест уведомлений об обновлениях', '');
+            $contents[] = array('text' => $result, 'error' => false);
+
+            $contents[] = array('text' => 'Отправка тестовых уведомлений об ошибках', 'error' => false);
+            $result = Notifier::send('warning', date('Y-m-d H:i:s'), 'TorrentMonitor notifier', 'Тест уведомлений об ошибках', '');
+            $contents[] = array('text' => $result, 'error' => false);
+
+
+            if ($torrentClient == 'Deluge')
+            {
+                $contents[] = array('text' => 'Проверка настроек Deluge', 'error' => false);
+                $contents[] = Deluge::checkSettings();
+            }
+            elseif ($torrentClient == 'Transmission')
+            {
+                $contents[] = array('text' => 'Проверка настроек Transmission', 'error' => false);
+                $contents[] = Transmission::checkSettings();
+            }
+
+
             $trackers = Database::getTrackersList();
             foreach ($trackers as $tracker)
             {
                 if (file_exists($dir.'trackers/'.$tracker.'.engine.php'))
                 {
-                    $contents[] = array('text' => 'Основной файл для работы с трекером "'.$tracker.'" найден.',);
+                    $contents[] = array('text' => 'Основной файл для работы с трекером "'.$tracker.'" найден.', 'error' => false);
                 }
                 else
                 {
@@ -61,7 +89,7 @@ if (Sys::checkInternet())
                 {
                     if (file_exists($dir.'trackers/'.$tracker.'.search.php'))
                     {
-                        $contents[] = array('text' => 'Дополнительный файл для работы с трекером "'.$tracker.'" найден.',);
+                        $contents[] = array('text' => 'Дополнительный файл для работы с трекером "'.$tracker.'" найден.', 'error' => false);
                     }
                     else
                     {
@@ -72,7 +100,7 @@ if (Sys::checkInternet())
                 
                 if (Database::checkTrackersCredentialsExist($tracker))
                 {
-                    $contents[] = array('text' => 'Учётные данные для работы с трекером "'.$tracker.'" найдены.',);
+                    $contents[] = array('text' => 'Учётные данные для работы с трекером "'.$tracker.'" найдены.', 'error' => false);
                 }
                 else
                 {
@@ -89,7 +117,7 @@ if (Sys::checkInternet())
 
                 if (Sys::checkavAilability($page))
                 {
-                    $contents[] = array('text' => 'Трекер "'.$tracker.'" доступен.',);
+                    $contents[] = array('text' => 'Трекер "'.$tracker.'" доступен.', 'error' => false);
                 }
                 else
                 {

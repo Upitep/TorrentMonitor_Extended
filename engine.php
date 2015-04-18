@@ -7,7 +7,7 @@ include_once $dir.'config.php';
 include_once $dir.'class/System.class.php';
 include_once $dir.'class/Database.class.php';
 include_once $dir.'class/Errors.class.php';
-include_once $dir.'class/Notification.class.php';
+include_once $dir.'class/Notifier.class.php';
 include_once $dir.'class/Trackers.class.php';
 
 header('Content-Type: text/html; charset=utf-8');
