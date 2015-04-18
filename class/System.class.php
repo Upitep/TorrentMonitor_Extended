@@ -66,7 +66,7 @@ class Sys
     //версия системы
     public static function version()
     {
-        return '1.2.1';
+        return '1.2.2';
     }
 
     //проверка обновлений системы
@@ -107,7 +107,7 @@ class Sys
             if (isset($param['header']))
                 curl_setopt($ch, CURLOPT_HEADER, 1);
 
-               curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+               curl_setopt($ch, CURLOPT_TIMEOUT, Database::getSetting('httpTimeout'));
 
             if (isset($param['returntransfer']))
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -116,11 +116,6 @@ class Sys
 
             if (isset($param['postfields']))
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $param['postfields']);
-
-            #curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
-            $curl = curl_version();
-            if (substr($curl["ssl_version"], 0, 3) == 'NSS')
-                curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'ecdhe_ecdsa_aes_128_sha');
 
             if (isset($param['cookie']))
                 curl_setopt($ch, CURLOPT_COOKIE, $param['cookie']);
@@ -144,6 +139,13 @@ class Sys
                 curl_setopt($ch, CURLOPT_PROXY, $settingProxyAddress); 
                 curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5); 
             }
+            
+            $curl = curl_version();
+            if (substr($curl["ssl_version"], 0, 3) == 'NSS')
+                curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'ecdhe_ecdsa_aes_128_sha');
+
+            if (Database::getSetting('debug'))
+                curl_setopt($ch, CURLOPT_VERBOSE, TRUE);
 
             $result = curl_exec($ch);
             curl_close($ch);
@@ -373,10 +375,10 @@ class Sys
         );
         //читаем xml
         $page = @simplexml_load_string($page);
-        for ($i=0; $i<count($page->news); $i++)
+        for ($i=0; $i<count($page->news->id); $i++)
         {
-            if ( ! Database::checkNewsExist($page->news[$i]->id))
-                Database::insertNews($page->news[$i]->id, $page->news[$i]->text);
+            if ( ! Database::checkNewsExist($page->news->id[$i]))
+                Database::insertNews($page->news->id[$i], $page->news->text[$i]);
         }
     }
 
@@ -401,27 +403,18 @@ class Sys
                 else
                     return TRUE;
             }
+            
+            if ( ! empty($_COOKIE['hash_pass']))
+            {
+                $hash_pass = Database::getSetting('password');
+                if ($_COOKIE['hash_pass'] != $hash_pass)
+                    return FALSE;
+                else
+                    return TRUE;
+            }
         }
         if ( ! $auth)
             return TRUE;
-    }
-    
-    //возвращаем путь к каталогу шаблона
-    public static function getTemplateDir()
-    {
-        return 'templates/';
-    }
-    
-    //возвращаем путь к корневому каталогу
-    public static function getBaseURL($filename, $root_dir)
-    {
-        // заменяем слэши на тот случай, если сервер работает под Windows
-        $filename = str_replace('\\', '/', $filename);
-        $root_dir = str_replace('\\', '/', $root_dir);
-        
-        $url = $_SERVER['SERVER_NAME'].$_SERVER["SCRIPT_NAME"];
-        $script_name = str_replace($root_dir, '', $filename);
-        return 'http://'.str_replace($script_name, '', $url);
     }
 }
 ?>

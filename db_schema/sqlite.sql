@@ -34,6 +34,7 @@ INSERT INTO "credentials" VALUES (12,'animelayer.ru', '', '','', '');
 INSERT INTO "credentials" VALUES (13,'tracker.0day.kiev.ua','','','', '');
 INSERT INTO "credentials" VALUES (14,'rustorka.com','','','', '');
 INSERT INTO "credentials" VALUES (15,'pornolab.net','','','', '');
+INSERT INTO "credentials" VALUES (17,'lostfilm-mirror',' ',' ','', '');
 
 CREATE TABLE `news` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -69,6 +70,7 @@ INSERT INTO "settings" VALUES (25, 'sendUpdateEmail', '');
 INSERT INTO "settings" VALUES (26, 'sendUpdatePushover', '');
 INSERT INTO "settings" VALUES (29, 'debug', '0');
 INSERT INTO "settings" VALUES (30, 'rss', '1');
+INSERT INTO "settings" VALUES (32, 'httpTimeout', '15');
 
 CREATE TABLE `temp` (
   `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
