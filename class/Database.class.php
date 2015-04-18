@@ -811,6 +811,39 @@ class Database
         $resultArray = NULL;
     }
     
+    public static function getWarningsCountSimple()
+    {
+        $stmt = self::newStatement("SELECT COUNT(*) AS `count` FROM `warning` GROUP BY `where`");        
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $resultArray[$i]['count'] = $row['count'];
+                $i++;
+            }
+            if ( ! empty($resultArray))
+                return $resultArray;
+        }
+        $stmt = NULL;
+        $resultArray = NULL;
+    }
+    
+    public static function getNewsCount()
+    {
+        $stmt = self::newStatement("SELECT COUNT(*) AS `count` FROM `news` WHERE `new` = 1");        
+        if ($stmt->execute())
+        {
+            foreach ($stmt as $row)
+            {
+                $resultArray['count'] = $row['count'];
+            }
+            if ( ! empty($resultArray))
+                return $resultArray;
+        }
+        $stmt = NULL;
+        $resultArray = NULL;
+    }
+    
     public static function getWarningsList($tracker)
     {
         if (Database::getDbType() == 'pgsql')

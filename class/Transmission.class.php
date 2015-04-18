@@ -11,36 +11,36 @@ class Transmission
         $settings = Database::getAllSetting();
         foreach ($settings as $row)
         {
-        	extract($row);
+            extract($row);
         }
 
-	try
-	{
-    	    $rpc = new TransmissionRPC('http://'.$torrentAddress.'/transmission/rpc', $torrentLogin, $torrentPassword);
-    	    #$rpc->debug=true;
-    	    $result = $rpc->sstats();
-
-    	    $individualPath = Database::getTorrentDownloadPath($id);
-    	    if ( ! empty($individualPath))
-        	$pathToDownload = $individualPath;
-
-    	    if ( ! empty($hash))
-    	    {
-        	$delOpt = 'false';
-        	if ($tracker == 'lostfilm.tv' || $tracker == 'novafilm.tv' || $tracker == 'baibako.tv' || $tracker == 'newstudio.tv')
-        	{
-            	    if ($deleteOldFiles)
-                	$delOpt = 'true';
-            	    #удяляем существующую закачку из torrent-клиента
-            	    if ($deleteDistribution)
-                	$result = $rpc->remove($hash, $delOpt);                    
-        	}
-        	else
-        	{
-            	    #удяляем существующую закачку из torrent-клиента
-            	    $result = $rpc->remove($hash, $delOpt);
-        	}
-    	    }
+        try
+        {
+            $rpc = new TransmissionRPC('http://'.$torrentAddress.'/transmission/rpc', $torrentLogin, $torrentPassword);
+            #$rpc->debug=true;
+            $result = $rpc->sstats();
+    
+            $individualPath = Database::getTorrentDownloadPath($id);
+            if ( ! empty($individualPath))
+                $pathToDownload = $individualPath;
+    
+            if ( ! empty($hash))
+            {
+                $delOpt = 'false';
+                if ($tracker == 'lostfilm.tv' || $tracker == 'novafilm.tv' || $tracker == 'baibako.tv' || $tracker == 'newstudio.tv')
+                {
+                    if ($deleteOldFiles)
+                        $delOpt = 'true';
+                    #удяляем существующую закачку из torrent-клиента
+                    if ($deleteDistribution)
+                        $result = $rpc->remove($hash, $delOpt);                    
+                }
+                else
+                {
+                    #удяляем существующую закачку из torrent-клиента
+                    $result = $rpc->remove($hash, $delOpt);
+                }
+            }
 
             #добавляем торрент в torrent-клиент
             $result = $rpc->add($file, $pathToDownload);
@@ -84,7 +84,7 @@ class Transmission
             }
             elseif (preg_match('/success/', $command))
             {
-	        #получаем хэш раздачи
+                #получаем хэш раздачи
                 $result = $rpc->get($idt, array('hashString'));
                 $hashNew = $result->arguments->torrents[0]->hashString;
                 #обновляем hash в базе
@@ -96,27 +96,31 @@ class Transmission
             }
             else
             {
-        	$return['status'] = FALSE;
-        	$return['msg'] = 'unknown';
-    	    }
+                $return['status'] = FALSE;
+                $return['msg'] = 'unknown';
+            }
         }
         catch (Exception $e)
         {
-    	    if (preg_match('/Invalid username\/password./', $e->getMessage()))
-    	    {
-    		$return['status'] = FALSE;
-    		$return['msg'] = 'log_passwd';
-    	    }
-    	    elseif (preg_match('/Unable to connect/', $e->getMessage()))
-    	    {
-    		$return['status'] = FALSE;
-    		$return['msg'] = 'connect_fail';
-    	    }
-    	    else
-    		die('[ERROR] ' . $e->getMessage() . PHP_EOL);
-    	    }
-
-    	return $return;
+            if (preg_match('/Invalid username\/password./', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
+                $return['msg'] = 'log_passwd';
+            }
+            if (preg_match('/Forbidden/', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
+                $return['msg'] = 'log_passwd';
+            }
+            elseif (preg_match('/Unable to connect/', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
+                $return['msg'] = 'connect_fail';
+            }
+            else
+                die('[ERROR]'.$e->getMessage().PHP_EOL);
+        }
+        return $return;
     }
 }
 ?>

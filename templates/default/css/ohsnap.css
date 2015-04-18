@@ -16,12 +16,27 @@
   border-radius: 4px;
   float: right;
   clear: right;
-  background-color: #FFFFFF;
 }
 
-.alert-error {
+.alert-red {
   color: white;
   background-color: #DA4453;
+}
+.alert-green {
+  color: white;
+  background-color: #37BC9B;
+}
+.alert-blue {
+  color: white;
+  background-color: #4A89DC;
+}
+.alert-yellow {
+  color: white;
+  background-color: #F6BB42;
+}
+.alert-orange {
+  color:white;
+  background-color: #E9573F;
 }
 
 .buttons {
