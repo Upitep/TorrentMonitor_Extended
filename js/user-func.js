@@ -416,11 +416,12 @@ $( document ).ready(function()
 
             notifiersSettings[i - 1] = notifier;
         } 
-        addNotify({ message: 'Обрабатывается запрос...' });
+        ohSnap('Обрабатывается запрос...', 'yellow');
         var settings = JSON.stringify(notifiersSettings);
         $.post("action.php",{action: 'updateNotifierSettings', settings: settings},
             function(data) {
-                addNotify({ message: data });
+                ohSnapX();
+                ohSnap(data, 'green');
             }
         );           
         return false;
