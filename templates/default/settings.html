@@ -1,0 +1,128 @@
+﻿<h2 class="settings-title">Настройки монитора</h2>
+
+<form id="setting">
+    <p>
+        <label class="label-name">Адрес TorrentMonitor</label>
+        <input type="text" name="serverAddress" value="{$serverAddress}">
+        <span class="subinput-text">Например: http://torrent.test.ru/</span>
+    </p>
+    <br/>
+    <p>
+        <label class="label-name"></label>
+        <label><input type="checkbox" name="auth" {if="$auth"}checked{/if}> Включить авторизацию</label>
+    </p>
+    <p>
+        <label class="label-name"></label>
+        <label><input type="checkbox" id="proxy" name="proxy" {if="$proxy"}checked{/if} onclick="expand('proxySettings')"> Использовать прокси</label>
+    </p>
+    <div id="proxySettings" {if="! $proxy"}class="result"{/if}>
+        <p>
+            <label class="label-name">IP, порт прокси-сервера</label>
+            <input type="text" name="proxyAddress" value="{$proxyAddress}">
+            <span class="subinput-text">Например: 127.0.0.1:9050</span>
+        </p>
+    </div>
+    <p>
+        <label class="label-name"></label>
+        <label><input type="checkbox" id="torrent" name="torrent" {if="$useTorrent"}checked{/if} onclick="expand('torrentSettings')"> Управлять торрент-клиентом</label>
+    </p>
+    <div id="torrentSettings" {if="! $useTorrent"}class="result"{/if}>
+        <p>
+            <label class="label-name">Торрент-клиент</label>
+            <label>
+                <select id="torrentClient" name="torrentClient">
+                    <option value="Deluge" {if="$torrentClient == 'Deluge'"}selected{/if}>Deluge</option>
+                    <option value="Transmission" {if="$torrentClient == 'Transmission'"}selected{/if}>Transmission</option>
+                </select>
+            </label>
+        </p>
+        <p>
+            <label class="label-name">IP, порт торрент-клиента</label>
+            <input type="text" name="torrentAddress" value="{$torrentAddress}">
+            <span class="subinput-text">Например: 127.0.0.1:58846</span>
+        </p>
+        <p>
+            <label class="label-name">Логин</label>
+            <input type="text" name="torrentLogin" value="{$torrentLogin}">
+            <span class="subinput-text">Например: KorP</span>
+        </p>
+        <p>
+            <label class="label-name">Пароль</label>
+            <input type="password" name="torrentPassword" value="{$torrentPassword}">
+            <span class="subinput-text">Например: Pa$$w0rd</span>
+        </p>
+        <p>
+            <label class="label-name">Директория для скачивания</label>
+            <input type="text" name="pathToDownload" value="{$pathToDownload}">
+            <span class="subinput-text">Например: /var/lib/transmission/downloads</span>
+        </p>
+        <p>
+            <label class="label-name"></label>
+            <label><input type="checkbox" name="deleteDistribution" {if="$deleteDistribution"}checked{/if}> Удалять раздачи</label>
+            <span class="subinput-text">Только для lostfilm.tv, novafilm.tv, baibako.tv и newstudio.tv</span>
+        </p>
+        <p>
+            <label class="label-name"></label>
+            <label><input type="checkbox" name="deleteOldFiles" {if="$deleteOldFiles"}checked{/if}> Удалять файлы старых раздач</label>
+            <span class="subinput-text">Только для lostfilm.tv, novafilm.tv, baibako.tv и newstudio.tv</span>
+        </p>
+    </div>
+    <p>
+        <label class="label-name"></label>
+        <label><input type="checkbox" name="rss" {if="$rss"}checked{/if}> RSS лента</label>
+    </p>
+    <p>
+        <label class="label-name"></label>
+        <label><input type="checkbox" name="debug" {if="$debug"}checked{/if}> Режим отладки</label>
+    </p>
+    <button class="form-button">Сохранить</button>
+</form>
+<br/>
+<br/>
+<h2 class="settings-title">Настройки уведомлений</h2>
+<form id="notifier_settings">
+    <label id="notifiers-table-hint"/>
+    <table class="notifierSettings" id="notifiers-table">
+        <tr class="notifierSettings">
+            <th>Сервис</th>
+            <th>Адрес</th>
+            <th><img src="img/icon9-2.png" title="Отправлять уведомления о добавлении/обновлении раздач"/></th>
+            <th><img src="img/icon6.png" title="Отправлять уведомления об ошибках"/></th>
+            <th/>
+        </tr>
+        {loop="notifiersList"}
+        <tr class="notifierSettings" group="{$value.notifier->Group()}">
+            <td class="notifierSettings"><select id="sendService" name="sendService" style="width: 150px;">
+            {loop="notifiers"}
+                <option value="{$value2.Name}" {if="$value2.Name == $value1.notifier->Name()"}selected{/if}>{$value2.VerboseName}</option>
+            {/loop}
+            </select></td>
+            <td><input type="text" name="sendAddress" value="{$value.notifier->SendAddress()}" style="width: 300px;"> </td>
+            <td><input type="checkbox" name="sendUpdate" {$value.needSendUpdate} > </td>
+            <td><input type="checkbox" name="sendWarning" {$value.needSendWarning} > </td>
+            <td><a class="delete" onclick="removeNotifierSetting(this)"></a> </td>
+        </tr>
+        {/loop}
+    </table>
+    <h2 class="add-notifier-title" >Добавить службу уведомлений</h2>
+    <label id="notifier-list-end"/>
+    <button class="form-button">Сохранить</button>
+</form>
+<br/>
+<br/>
+<h2 class="settings-title">Смена пароля</h2>
+<form id="change_pass">
+    <p>
+        <label class="label-name">Новый пароль</label>
+        <input type="password" name="password">
+    </p>
+    <p>
+        <label class="label-name">Еще раз</label>
+        <input type="password" name="password2">
+    </p>
+    <button class="form-button">Сменить</button>
+</form>
+  
+  <div class="clear-both"></div>
+  
+  <script src="js/user-func.js"></script>

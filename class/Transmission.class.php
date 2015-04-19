@@ -1,6 +1,6 @@
 <?php
-$dir = dirname(__FILE__).'/';
-include_once $dir.'TransmissionRPC.class.php';
+$dir = str_replace('class', '', dirname(__FILE__));
+include_once $dir.'class/TransmissionRPC.class.php';
 
 class Transmission
 {
@@ -11,35 +11,35 @@ class Transmission
         $settings = Database::getAllSetting();
         foreach ($settings as $row)
         {
-        	extract($row);
+            extract($row);
         }
 
-    	try
-    	{
+        try
+        {
             $rpc = new TransmissionRPC('http://'.$torrentAddress.'/transmission/rpc', $torrentLogin, $torrentPassword);
-        	#$rpc->debug=true;
-        	$result = $rpc->sstats();
+            #$rpc->debug=true;
+            $result = $rpc->sstats();
     
-        	$individualPath = Database::getTorrentDownloadPath($id);
-        	if ( ! empty($individualPath))
-            	$pathToDownload = $individualPath;
+            $individualPath = Database::getTorrentDownloadPath($id);
+            if ( ! empty($individualPath))
+                $pathToDownload = $individualPath;
     
-        	if ( ! empty($hash))
-        	{
-            	$delOpt = 'false';
-            	if ($tracker == 'lostfilm.tv' || $tracker == 'novafilm.tv' || $tracker == 'baibako.tv' || $tracker == 'newstudio.tv')
-            	{
+            if ( ! empty($hash))
+            {
+                $delOpt = 'false';
+                if ($tracker == 'lostfilm.tv' || $tracker == 'novafilm.tv' || $tracker == 'baibako.tv' || $tracker == 'newstudio.tv')
+                {
                     if ($deleteOldFiles)
                         $delOpt = 'true';
-            	    #удяляем существующую закачку из torrent-клиента
-            	    if ($deleteDistribution)
-                	    $result = $rpc->remove($hash, $delOpt);                    
-            	}
-            	else
-            	{
-            	    #удяляем существующую закачку из torrent-клиента
-            	    $result = $rpc->remove($hash, $delOpt);
-            	}
+                    #удяляем существующую закачку из torrent-клиента
+                    if ($deleteDistribution)
+                        $result = $rpc->remove($hash, $delOpt);                    
+                }
+                else
+                {
+                    #удяляем существующую закачку из torrent-клиента
+                    $result = $rpc->remove($hash, $delOpt);
+                }
             }
 
             #добавляем торрент в torrent-клиент
@@ -84,7 +84,7 @@ class Transmission
             }
             elseif (preg_match('/success/', $command))
             {
-	            #получаем хэш раздачи
+                #получаем хэш раздачи
                 $result = $rpc->get($idt, array('hashString'));
                 $hashNew = $result->arguments->torrents[0]->hashString;
                 #обновляем hash в базе
@@ -96,31 +96,53 @@ class Transmission
             }
             else
             {
-        	    $return['status'] = FALSE;
+                $return['status'] = FALSE;
                 $return['msg'] = 'unknown';
-    	    }
+            }
         }
         catch (Exception $e)
         {
-    	    if (preg_match('/Invalid username\/password./', $e->getMessage()))
-    	    {
-    		    $return['status'] = FALSE;
+            if (preg_match('/Invalid username\/password./', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
                 $return['msg'] = 'log_passwd';
-    	    }
-    	    if (preg_match('/Forbidden/', $e->getMessage()))
-    	    {
-    		    $return['status'] = FALSE;
+            }
+            if (preg_match('/Forbidden/', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
                 $return['msg'] = 'log_passwd';
-    	    }
-    	    elseif (preg_match('/Unable to connect/', $e->getMessage()))
-    	    {
-    		    $return['status'] = FALSE;
+            }
+            elseif (preg_match('/Unable to connect/', $e->getMessage()))
+            {
+                $return['status'] = FALSE;
                 $return['msg'] = 'connect_fail';
-    	    }
-    	    else
-    		    die('[ERROR]'.$e->getMessage().PHP_EOL);
+            }
+            else
+                die('[ERROR]'.$e->getMessage().PHP_EOL);
         }
-    	return $return;
+        return $return;
+    }
+
+    public static function checkSettings()
+    {
+        $settings = Database::getAllSetting();
+        foreach ($settings as $row)
+            extract($row);
+
+    	try
+	    {
+    	    $rpc = new TransmissionRPC('http://'.$torrentAddress.'/transmission/rpc', $torrentLogin, $torrentPassword);
+    	    $result = $rpc->sstats()->result;
+        }
+        catch (Exception $e)
+        {
+            return array('text' => '<p>'.$e->getMessage().'</p>', 'error' => true);
+        }
+
+        if ( $result != "success" )
+            return array('text' => '<p>'.$result.'</p>', 'error' => true);
+        else
+            return array('text' => 'OK', 'error' => false);
     }
 }
 ?>

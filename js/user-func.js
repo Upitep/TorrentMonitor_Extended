@@ -37,10 +37,13 @@ $( document ).ready(function()
                 if (data.error)
                 {
                     ohSnapX();
-                    ohSnap(data.msg, 'green');
+                    ohSnap(data.msg, 'red');
                 }
-                else
-                    document.location.reload();
+                else {
+                    ohSnapX();
+                    ohSnap(data.msg, 'green');
+                    showIndexContent();
+                }
                 console.log(data.error)
             }, "json"
         );
@@ -291,13 +294,6 @@ $( document ).ready(function()
         var $form = $(this),
             s = $form.find('input[type=submit]'),
             serverAddress = $form.find('input[name="serverAddress"]').val();
-            send = $form.find('input[name="send"]').prop('checked');
-            sendUpdate = $form.find('input[name="sendUpdate"]').prop('checked');
-            sendUpdateEmail = $form.find('input[name="sendUpdateEmail"]').val();
-            sendUpdatePushover = $form.find('input[name="sendUpdatePushover"]').val();            
-            sendWarning = $form.find('input[name="sendWarning"]').prop('checked');
-            sendWarningEmail = $form.find('input[name="sendWarningEmail"]').val();
-            sendWarningPushover = $form.find('input[name="sendWarningPushover"]').val();            
             auth = $form.find('input[name="auth"]').prop('checked');
             proxy = $form.find('input[name="proxy"]').prop('checked');
             proxyAddress = $form.find('input[name="proxyAddress"]').val();
@@ -334,8 +330,11 @@ $( document ).ready(function()
         }
 
         ohSnap('Обрабатывается запрос...', 'yellow');
-        $.post("action.php",{action: 'update_settings', serverAddress: serverAddress, send: send, sendUpdate: sendUpdate,
-            sendUpdateEmail: sendUpdateEmail, sendUpdatePushover: sendUpdatePushover, sendWarning: sendWarning, sendWarningEmail: sendWarningEmail, sendWarningPushover: sendWarningPushover, auth: auth, proxy: proxy, proxyAddress: proxyAddress, torrent: torrent, torrentClient: torrentClient, torrentAddress: torrentAddress, torrentLogin: torrentLogin, torrentPassword: torrentPassword, pathToDownload: pathToDownload, deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, rss: rss, debug: debug},
+        $.post("action.php",{action: 'update_settings', serverAddress: serverAddress, 
+            auth: auth, proxy: proxy, proxyAddress: proxyAddress, torrent: torrent, torrentClient: torrentClient, 
+            torrentAddress: torrentAddress, torrentLogin: torrentLogin, torrentPassword: torrentPassword, 
+            pathToDownload: pathToDownload, deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, 
+            rss: rss, debug: debug},
             function(data) {
                 ohSnapX();
                 ohSnap(data, 'green');
@@ -388,7 +387,7 @@ $( document ).ready(function()
     //Вызов процедуры обновления
     $("#system_update").submit(function()
     {
-        $('#system_update').empty().append('<img src="img/ajax-loader.gif" class="loader">');
+        $('#system_update').empty().append('<div id="loader"></div>');
         
         $.post("action.php",{action: 'system_update'},
             function(data) {
@@ -397,13 +396,44 @@ $( document ).ready(function()
         );
     });
 
+    //Сохраняем настройки уведомлений
+    $("#notifier_settings").submit(function()
+    {
+        //debugger;        
+        var table = document.getElementById('notifiers-table');
+
+        var notifiersSettings = {}; 
+        for (var i = 1, row; row = table.rows[i]; i++) {
+            var notifier = {};
+            notifier["group"] = parseInt(row.getAttribute('group'));
+
+            var notifSelect = row.children[0].children[0];
+            notifier["notifier"] = notifSelect.options[notifSelect.selectedIndex].value;
+
+            notifier["address"] = row.children[1].children[0].value;
+            notifier["sendUpdate"] = row.children[2].children[0].checked;
+            notifier["sendWarning"] = row.children[3].children[0].checked;
+
+            notifiersSettings[i - 1] = notifier;
+        } 
+        ohSnap('Обрабатывается запрос...', 'yellow');
+        var settings = JSON.stringify(notifiersSettings);
+        $.post("action.php",{action: 'updateNotifierSettings', settings: settings},
+            function(data) {
+                ohSnapX();
+                ohSnap(data, 'green');
+            }
+        );           
+        return false;
+    });
+
 });
 
 //Подгрузка страниц
 function show(name)
 {
     if (name == 'check' || name == 'execution' || name == 'update')
-        $('#content').empty().append('<img src="img/ajax-loader.gif" class="loader">');
+        $('#content').empty().append('<div id="loader"></div>');
 
     $.get("include/"+name+".php",
         function(data) {
@@ -449,7 +479,7 @@ function delete_user(id)
     	$.post("action.php",{action: 'delete_user', user_id: id},
     		function(data) {
     			ohSnapX();
-                ohSnap(data, 'green');
+                        ohSnap(data, 'green');
     			$.get("include/show_watching.php",
             		function(data) {
             			$('#content').delay(3000).empty().append(data);
@@ -470,7 +500,7 @@ function delete_from_buffer(id)
     	$.post("action.php",{action: 'delete_from_buffer', id: id},
     		function(data) {
     			ohSnapX();
-                ohSnap(data, 'green');
+                        ohSnap(data, 'green');
     			$.get("include/show_watching.php",
             		function(data) {
             			$('#content').delay(3000).empty().append(data);
@@ -489,7 +519,7 @@ function transfer_from_buffer(id)
 	$.post("action.php",{action: 'transfer_from_buffer', id: id},
 		function(data) {
 			ohSnapX();
-            ohSnap(data, 'green');
+                        ohSnap(data, 'green');
 			$.get("include/show_watching.php",
         		function(data) {
         			$('#content').delay(3000).empty().append(data);
@@ -504,13 +534,13 @@ function transfer_from_buffer(id)
 //Передаём темы для скачивания
 function threme_add(id, user_id)
 {
-    ohSnap('Обрабатывается запрос...', 'yellow');
+        ohSnap('Обрабатывается запрос...', 'yellow');
 	$.post("action.php",{action: 'threme_add', id: id, user_id: user_id},
 		function(data) {
 			if (data.error)
 			{
     			ohSnapX();
-                ohSnap('Ошибка передачи данных<br/>Попробуйте ещё раз.', 'green');
+                        ohSnap('Ошибка передачи данных<br/>Попробуйте ещё раз.', 'green');
 			}
 			else
 			{
@@ -594,4 +624,68 @@ function newsRead(id)
             $('.'+id).removeClass();
         }
     );
+}
+
+$(".add-notifier-title").click(function() {
+    //debugger;
+    var maxGroup = 0;
+    var table = document.getElementById('notifiers-table');
+    for (var i = 1, row; row = table.rows[i]; i++) {
+        var rowGroup = parseInt(row.getAttribute('group'));
+        if (rowGroup > maxGroup)
+            maxGroup = rowGroup;
+    }
+    maxGroup += 1;
+
+    var availableNotifiersHtml = "";
+    $.post("action.php", {action: 'getNotifierList'},
+		function(data) {
+            for (var notifier in data) {
+                    availableNotifiersHtml += "<option value=\"" + data[notifier].Name + "\" >" + data[notifier].VerboseName + "</option>";
+            }
+            var table_row = '<tr class="notifierSettings" group="' + maxGroup + '">' +
+                    '<td class="notifierSettings"><select id="sendService" name="sendService" style="width: 150px;">' + availableNotifiersHtml + '</select> </td>' +
+                    '<td class="notifierSettings"><input type="text" name="sendAddress" value="" style="width: 300px;"> </td>' +
+                    '<td class="notifierSettings"><input type="checkbox" name="sendUpdate" > </td>' +
+                    '<td class="notifierSettings"><input type="checkbox" name="sendWarning" > </td>' +
+                    '<td class="notifierSettings"><a class="delete" onclick="removeNotifierSetting(this)"></a> </td>' +
+                    '</tr>';
+            $(table_row).hide().insertAfter($('#notifiers-table tr:last')).removeClass("hide").addClass("show-row").hide().show('fast');
+		}, "json"
+	);
+});
+
+function removeNotifierSetting(btn) 
+{
+    var tr = btn.parentNode.parentNode;
+    var group = tr.getAttribute('group');
+    var notifSelect = tr.children[0].children[0];
+    var notifier = notifSelect.options[notifSelect.selectedIndex].value;
+
+    $.post("action.php", {action: 'removeNotifierSettings', notifierClass: notifier, group: group});
+
+    tr.parentNode.removeChild(tr);
+}
+
+
+//Обновляем основную страницу без перезагрузки содержимого
+function showIndexContent()
+{
+    $.post("action.php", {action: 'getIndexPage'},
+        function(data) {
+            $('#index_content').empty().append(data.content);
+            
+            if (data.type == 'auth') {
+                FocusOnInput('password');
+            }
+            else if (data.type == 'main') {
+                show('show_table');
+            }
+        }, "json"
+    );
+}
+
+//Переводим фокус на переданное поле ввода 
+function FocusOnInput(fieldName) {
+    document.getElementById(fieldName).focus();
 }

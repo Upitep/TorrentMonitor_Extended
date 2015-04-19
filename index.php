@@ -1,11 +1,17 @@
 <?php
-$dir = dirname(__FILE__)."/";
-include_once $dir."config.php";
-include_once $dir."class/Database.class.php";
-include_once $dir."class/System.class.php";
+$dir = dirname(__FILE__).'/' ;
 
-if (Sys::checkAuth())
-    require_once "pages/main.php";
-else
-    require_once "pages/auth.php";
+session_start();
+
+include_once $dir."class/System.class.php";
+include_once $dir."class/rain.tpl.class.php";
+
+// заполнение шаблона
+raintpl::configure("root_dir", $dir );
+raintpl::configure("tpl_dir" , Sys::getTemplateDir() );
+
+$tpl = new RainTPL;
+$tpl->assign( "title"  , 'Мониторинг torrent трекеров' );
+$tpl->draw( "index" );
+
 ?>

@@ -1,11 +1,15 @@
 <?php
-$dir = dirname(__FILE__).'/../';
+$dir = str_replace('include', '', dirname(__FILE__));
+
 include_once $dir."class/System.class.php";
-include_once $dir."class/Database.class.php";
 
 if ( ! Sys::checkAuth())
     die(header('Location: ../'));
-    
+
+include_once $dir."class/rain.tpl.class.php";
+
+// заполнение раздело помощи
+// возможно имеет смысл перенести справку в xml файл
 $opts = stream_context_create(array(
     'http' => array(
         'timeout' => 1
@@ -15,20 +19,22 @@ $xmlstr = @file_get_contents('http://korphome.ru/torrent_monitor/help.xml', fals
 $xml = @simplexml_load_string($xmlstr);
 if (false !== $xml)
 {
-    ?>
-    <h2 class="settings-title">Помощь</h2>
-    <div><?php echo $xml->help ?></div>
-    <h2 class="settings-title">О проекте</h2>
-    <div><?php echo $xml->about ?></div>
-    <h2 class="settings-title">Разработчики</h2>
-    <div><?php echo $xml->developers ?></div>
-    <?php
+    //Помощь
+    $contents[] = array( 'title' => 'Помощь', 'content' => $xml->help,);
+    //О проекте
+    $contents[] = array( 'title' => 'О проекте', 'content' => $xml->about,);
+    //Разработчики
+    $contents[] = array( 'title' => 'Разработчики', 'content' => $xml->developers,);
 }
 else
-{
-    ?>
-    <div>Не удалось загрузить файл help.xml</div>
-    <?php
-}
+    $contents[] = array( 'title' => 'Помощь', 'content' => 'Не удалось загрузить файл help.xml',);
+
+// заполнение шаблона
+raintpl::configure("root_dir", $dir );
+raintpl::configure("tpl_dir" , Sys::getTemplateDir() );
+
+$tpl = new RainTPL;
+$tpl->assign( "contents", $contents );
+
+$tpl->draw( 'help' );
 ?>
-<div class="clear-both"></div>
