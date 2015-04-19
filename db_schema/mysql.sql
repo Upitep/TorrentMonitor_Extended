@@ -58,7 +58,8 @@ VALUES
 	(12,'animelayer.ru','','','', ''),
 	(13,'tracker.0day.kiev.ua','','','', ''),
 	(15,'pornolab.net','','','', ''),
-	(14,'rustorka.com','','','', '');
+	(14,'rustorka.com','','','', ''),
+	(17,'lostfilm-mirror',' ',' ','', '');
 
 /*!40000 ALTER TABLE `credentials` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -113,7 +114,8 @@ VALUES
 	(25,'sendUpdateEmail',''),
 	(26,'sendUpdatePushover',''),
 	(29,'debug','0'),
-	(30,'rss','1');
+	(30,'rss','1'),
+	(32,'httpTimeout','15');
 
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
