@@ -23,7 +23,7 @@ if (isset($_POST['action']))
             $_SESSION['TM'] = $password;
             $return['error'] = FALSE;
             $return['msg'] = 'Вход выполнен успешно.';
-            if ($POST['remember'])
+            if (isset($_POST['remember']) && $_POST['remember'])
                 setcookie('hash_pass', $password, time()+3600*24*31);
         }
         else
