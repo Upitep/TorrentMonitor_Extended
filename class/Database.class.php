@@ -1201,5 +1201,86 @@ class Database
         return $result;
 
     }
+
+    public static function updateBlockedIPs($ips, $last_date)
+    {
+    	if($db = Database::getInstance()->dbh)
+    	{
+    		if (Database::getDbType() == 'pgsql')
+    		{
+    			$stmt = $db->prepare("DELETE FROM blocked_ips");
+    			if ($stmt->execute())
+    			{
+    				$stmt = $db->prepare("VACUUM");
+    				if (!$stmt->execute()) return FALSE;
+    
+    				$stmt = $db->prepare("INSERT INTO blocked_ips (ip) VALUES (:ip)");
+    				$db->beginTransaction();
+    				foreach ($ips as $value)
+    				{
+    					$stmt->bindParam(':ip', $value);
+    					if (!$stmt->execute()) return FALSE;
+    				}
+    				$db->commit();
+    
+    				if (!Database::updateSettings('lastUpdateBlockedIPs', $last_date)) return FALSE;
+    				return TRUE;
+    			}
+    			else return FALSE;
+    		}
+    		elseif (Database::getDbType() == 'sqlite')
+    		{
+    			$stmt = $db->prepare("DELETE FROM `blocked_ips`");
+    			if ($stmt->execute())
+    			{
+    				$stmt = $db->prepare("VACUUM");
+    				if (!$stmt->execute()) return FALSE;
+    
+    				$stmt = $db->prepare("INSERT INTO `blocked_ips` (ip) VALUES (:ip)");
+    				$db->beginTransaction();
+    				foreach ($ips as $value)
+    				{
+    					$stmt->bindParam(':ip', $value);
+    					if (!$stmt->execute()) return FALSE;
+    				}
+    				$db->commit();
+    
+    				if (!Database::updateSettings('lastUpdateBlockedIPs', $last_date)) return FALSE;
+    				return TRUE;
+    			}
+    			else return FALSE;
+    		}
+    		elseif (Database::getDbType() == 'mysql')
+    		{
+    			$stmt = $db->prepare("DELETE FROM `blocked_ips`");
+    			if ($stmt->execute())
+    			{
+    				$stmt = $db->prepare("INSERT INTO `blocked_ips` (ip) VALUES (:ip)");
+    				foreach ($ips as $value)
+    				{
+    					$stmt->bindParam(':ip', $value);
+    					if (!$stmt->execute()) return FALSE;
+    				}
+    				if (!Database::updateSettings('lastUpdateBlockedIPs', $last_date)) return FALSE;
+    				return TRUE;
+    			}
+    			else return FALSE;
+    		}
+    	}
+    	else return FALSE;
+    }
+    
+    public static function checkIPExist($ip)
+    {
+    	$stmt = self::newStatement("SELECT COUNT(*) FROM `blocked_ips` WHERE `ip` = :ip");
+    	$stmt->bindParam(':ip', $ip);
+    	if ($stmt->execute())
+    	{
+    		if($stmt->fetchColumn() > 0)
+    			return TRUE;
+    		else return FALSE;
+    	}
+    	else return FALSE;
+    }
 }
 ?>

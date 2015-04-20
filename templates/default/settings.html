@@ -17,6 +17,11 @@
     </p>
     <div id="proxySettings" {if="! $proxy"}class="result"{/if}>
         <p>
+           <label class="label-name"></label>
+           <label><input type="checkbox" name="autoProxy" {if="$autoProxy"}checked{/if}> Только для заблокированных ресурсов</label>
+	   	   <span class="subinput-text">Поиск ресурсов в реестре запрещенных сайтов Роскомнадзора и доступ к ним через указанный прокси-сервер. Рекомендуется antizapret.prostovpn.org:3128</span>
+		</p>
+        <p>
             <label class="label-name">IP, порт прокси-сервера</label>
             <input type="text" name="proxyAddress" value="{$proxyAddress}">
             <span class="subinput-text">Например: 127.0.0.1:9050</span>

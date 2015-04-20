@@ -82,7 +82,7 @@ INSERT INTO settings VALUES (5, 'password', '1f10c9fd49952a7055531975c06c5bd8');
 INSERT INTO settings VALUES (6, 'auth', '1');
 INSERT INTO settings VALUES (4, 'sendWarning', '0');
 INSERT INTO settings VALUES (7, 'proxy', '0');
-INSERT INTO settings VALUES (8, 'proxyAddress', '127.0.0.1:9050');
+INSERT INTO settings VALUES (8, 'proxyAddress', 'antizapret.prostovpn.org:3128');
 INSERT INTO settings VALUES (11, 'torrentAddress', '127.0.0.1:9091');
 INSERT INTO settings VALUES (12, 'torrentLogin', '');
 INSERT INTO settings VALUES (13, 'torrentPassword', '');
@@ -100,6 +100,8 @@ INSERT INTO settings VALUES (26, 'sendUpdatePushover', '');
 INSERT INTO settings VALUES (29, 'debug', '0');
 INSERT INTO settings VALUES (30, 'rss', '1');
 INSERT INTO settings VALUES (32, 'httpTimeout', '15');
+INSERT INTO settings VALUES (33, 'lastUpdateBlockedIPs', '');
+INSERT INTO settings VALUES (34, 'autoProxy', '0');
 
 
 
@@ -168,12 +170,19 @@ CREATE TABLE "watch" (
 
 CREATE SEQUENCE auto_id_pluginsettings;
 
-CREATE TABLE "pluginsettings" {
+CREATE TABLE "pluginsettings" (
   "id" INTEGER PRIMARY KEY NOT NULL DEFAULT nextval('auto_id_pluginsettings'),
   "type" varchar(255) NOT NULL,
   "plugin" varchar(255) NOT NULL,
   "group" INTEGER NULL,
   "key" varchar(255) NOT NULL,
   "value" varchar(255) NOT NULL
-};
+);
 
+
+-- Дамп таблицы blocked_ips
+-- ------------------------------------------------------------
+
+CREATE TABLE "blocked_ips" (
+    "ip" varchar(15) DEFAULT NULL
+);
