@@ -144,12 +144,29 @@ class Sys
                 curl_setopt($ch, CURLOPT_REFERER, $param['referer']);
 
             $settingProxy = Database::getSetting('proxy');
+			$settingAutoProxy = Database::getSetting('autoProxy');
             if ($settingProxy)
             {
-                $settingProxyAddress = Database::getSetting('proxyAddress');
-                curl_setopt($ch, CURLOPT_PROXY, $settingProxyAddress);
-                curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+				$settingProxyAddress = Database::getSetting('proxyAddress');
+				if ($settingAutoProxy)
+				{
+					if (Sys::checkAndUpdateBlockedIPs())
+					{
+						if(Database::checkIPExist(gethostbyname(parse_url($param['url'], PHP_URL_HOST))))
+						{
+							curl_setopt($ch, CURLOPT_PROXY, '$settingProxyAddress');
+							curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+						}
+					}
+					else Errors::setWarnings('BlockListIP', 'update_blocklist_ip_fail');
+				}
+				else
+				{
+					curl_setopt($ch, CURLOPT_PROXY, $settingProxyAddress); 
+					curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+				}
             }
+            
 
             $curl = curl_version();
             if (substr($curl["ssl_version"], 0, 3) == 'NSS')
@@ -455,6 +472,61 @@ class Sys
             $notifier = null;
         }
         return $result;
+    }
+
+    public static function checkAndUpdateBlockedIPs()
+    {
+    	$curl = curl_init('http://antizapret.prostovpn.org/proxy.pac');
+    
+    	curl_setopt($curl, CURLOPT_NOBODY, true);
+    	curl_setopt($curl, CURLOPT_HEADER, true);
+    	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    	curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0');
+    
+    	$headers = curl_exec($curl);
+    	curl_close($curl);
+    
+    	if($headers)
+    	{
+    		if(preg_match( "/^HTTP\/1\.[01] (\d\d\d)/", $headers, $matches))
+    		{
+    			$status = (int)$matches[1];
+    			if($status == 200 || ($status > 300 && $status <= 308))
+    			{
+    				if(preg_match("/(?<=Last-Modified:\s)([A-Z,a-z]{3},\s\d{2}\s[A-Z,a-z]{3}\s\d{4}\s\d{2}:\d{2}:\d{2}\s[A-Z]{3})/", $headers, $matches))
+    				{
+    					$last_date = date("Y-m-d H:i:s",strtotime($matches[1]));
+    
+    					if (Database::getSetting('lastUpdateBlockedIPs') !== $last_date)
+    					{
+    						$curl = curl_init('http://antizapret.prostovpn.org/proxy.pac');
+    						curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    						curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+    						curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0');
+    							
+    						$data = curl_exec($curl);
+    						curl_close($curl);
+    							
+    						if ($data)
+    						{
+    							if(preg_match_all("/(?<=\")(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?=\")/", $data, $ips))
+    							{
+    								if (Database::updateBlockedIPs($ips[1], $last_date)) return TRUE;
+    								else return FALSE;
+    							}
+    							else return FALSE;
+    						}
+    						else return FALSE;
+    					}
+    					else return TRUE;
+    				}
+    				else return FALSE;
+    			}
+    			else return FALSE;
+    		}
+    		else return FALSE;
+    	}
+    	else return FALSE;
     }
 }
 ?>

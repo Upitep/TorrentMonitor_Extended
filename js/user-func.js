@@ -296,6 +296,7 @@ $( document ).ready(function()
             serverAddress = $form.find('input[name="serverAddress"]').val();
             auth = $form.find('input[name="auth"]').prop('checked');
             proxy = $form.find('input[name="proxy"]').prop('checked');
+            autoProxy = $form.find('input[name="autoProxy"]').prop('checked');
             proxyAddress = $form.find('input[name="proxyAddress"]').val();
             torrent = $form.find('input[name="torrent"]').prop('checked');
             torrentClient = $form.find('select[name="torrentClient"]').val();
@@ -331,10 +332,10 @@ $( document ).ready(function()
 
         ohSnap('Обрабатывается запрос...', 'yellow');
         $.post("action.php",{action: 'update_settings', serverAddress: serverAddress, 
-            auth: auth, proxy: proxy, proxyAddress: proxyAddress, torrent: torrent, torrentClient: torrentClient, 
-            torrentAddress: torrentAddress, torrentLogin: torrentLogin, torrentPassword: torrentPassword, 
-            pathToDownload: pathToDownload, deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, 
-            rss: rss, debug: debug},
+            auth: auth, proxy: proxy, autoProxy: autoProxy, proxyAddress: proxyAddress, torrent: torrent,
+            torrentClient: torrentClient, torrentAddress: torrentAddress, torrentLogin: torrentLogin,
+            torrentPassword: torrentPassword, pathToDownload: pathToDownload,
+            deleteDistribution: deleteDistribution, deleteOldFiles: deleteOldFiles, rss: rss, debug: debug},
             function(data) {
                 ohSnapX();
                 ohSnap(data, 'green');

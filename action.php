@@ -282,6 +282,7 @@ if (isset($_POST['action']))
         Database::updateSettings('serverAddress', Sys::checkPath($_POST['serverAddress']));
         Database::updateSettings('auth', Sys::strBoolToInt($_POST['auth']));
         Database::updateSettings('proxy', Sys::strBoolToInt($_POST['proxy']));
+        Database::updateSettings('autoProxy', Sys::strBoolToInt($_POST['autoProxy']));
         Database::updateSettings('proxyAddress', $_POST['proxyAddress']);
         Database::updateSettings('useTorrent', Sys::strBoolToInt($_POST['torrent']));
         Database::updateSettings('torrentClient', $_POST['torrentClient']);

@@ -97,7 +97,7 @@ VALUES
 	(5,'password','1f10c9fd49952a7055531975c06c5bd8'),
 	(6,'auth','1'),
 	(4,'sendWarning','0'),
-	(8,'proxyAddress','127.0.0.1:9050'),
+	(8,'proxyAddress','antizapret.prostovpn.org:3128'),
 	(7,'proxy','0'),
 	(13,'torrentPassword',''),
 	(12,'torrentLogin',''),
@@ -116,7 +116,9 @@ VALUES
 	(29,'debug','0'),
 	(30,'rss','1'),
 	(32,'httpTimeout','15');
-
+	(33, 'lastUpdateBlockedIPs', ''),
+	(34, 'autoProxy', '0');
+	
 /*!40000 ALTER TABLE `settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -186,6 +188,14 @@ CREATE TABLE `pluginsettings` (
       `key` VARCHAR(255) NOT NULL,
       `value` VARCHAR(255) NOT NULL,
       PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+
+DROP TABLE IF EXISTS `blocked_ips`;
+
+CREATE TABLE `blocked_ips` (
+  `ip` varchar(15) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 
