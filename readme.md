@@ -1,3 +1,10 @@
+# ВНИМАНИЕ!!!
+ Данный репозитарий является **КОПИЕЙ** оригинального репозитария [TorrentMonitor](https://github.com/ElizarovEugene/TorrentMonitor), который был созан [Евгением Елизаровым](https://github.com/ElizarovEugene).
+
+В связи с закрытие оригинального репозитария на GitHub, было принято решение о создании репозитария со всеми доработками,  которые не попали в оригинал.
+
+По всем вопросам просьба не беспокоить обращаться в раздел *Issues* на текущего репозитария
+
 # TorrentMonitor
 Приложение мониторит изменения на популярных торрент-трекерах рунета и автоматизирует закачку обновлений (сериалы, раздачи которые ведутся *путем добавления новых серий/новых версий*, перезалитые торрент-файлы и т.д.)
 
@@ -27,18 +34,9 @@
 
 * Управление торрент-клиентами (добавление/удаление раздач и файлов): Transmission (через XML-RPC), Deluge (через deluge-console).
 
-* Уведомления на E-mail и через https://pushover.net
+* Уведомления на E-mail и через сервисы push-уведомлений
 
 * RSS-лента
-
-###Скриншоты:
- ![Screenshot0](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-53-42.jpg "Screenshot0")
- ![Screenshot1](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-54-16.jpg "Screenshot1")
- ![Screenshot2](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-54-38.jpg "Screenshot2")
- ![Screenshot3](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-54-52.jpg "Screenshot3")
- ![Screenshot4](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-55-28.jpg "Screenshot4")
- ![Screenshot5](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-55-41.jpg "Screenshot5")
- ![Screenshot6](http://blog.korphome.ru/wp-content/uploads/2011/02/Мониторинг-torrent-трекеров-2014-01-27-14-56-36.jpg "Screenshot6")
 
 ###Требования для установки:
 
@@ -108,15 +106,3 @@ allow_url_fopen = on
 ; и каталог куда будут сохраняться *.torrent файлы для torrent клиента
 open_basedir = /tmp/:/path/to/folder/torrent_monitor/:/path/to/folder/torrent_client_watch/
 ```
-
-###Обновление:
-
-Наилучшим, и самым простым, способом обновления приложения является удаление всех файлов, кроме config.php и заливкой новой версии. Также, если в обновлении имеется update.sql, его необходимо выполнить в вашей базе данных.
-
-###Страница проекта:
-
-http://blog.korphome.ru/torrentmonitor/
-
-###Форум:
-
-http://korphome.ru/TorrentMonitor/
